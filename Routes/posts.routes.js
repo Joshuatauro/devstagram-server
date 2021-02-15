@@ -53,21 +53,32 @@ router.route("/add").post(async (req, res) => {
   const content = req.body.content;
   const subreddit = req.body.subreddit;
   const createdAt = new Date();
+  const imgURL = req.body.downloadURL
 
 
   try {
-    const response = await db.query(
-      "INSERT INTO posts(username, title, content, subreddit, createdat) VALUES ($1,$2,$3,$4,$5) returning *",
-      [userName, title, content, subreddit, createdAt]
-    );
-
-    res.status(200).json({
-      status: "Success",
-      postID: response.rows[0].postid,
-    });
+    if(imgURL){
+      const response = await db.query(
+        "INSERT INTO posts(username, title, content, subreddit, createdat, img_url ) VALUES ($1,$2,$3,$4,$5, $6) returning *",
+        [userName, title, content, subreddit, createdAt, imgURL]
+      )
+      res.status(200).json({
+        status: "Success",
+        postID: response.rows[0].postid,
+      });
+    } else {
+      const response = await db.query(
+        "INSERT INTO posts(username, title, content, subreddit, createdat ) VALUES ($1,$2,$3,$4,$5) returning *",
+        [userName, title, content, subreddit, createdAt]
+      )
+      res.status(200).json({
+        status: "Success",
+        postID: response.rows[0].postid,
+      });
+    }
   } catch (err) {
     res.status(400).json({
-      status: "Failed",
+      status: "There was something wrong",
       message: err.message,
     });
   }
@@ -146,7 +157,7 @@ router.route("/:postID").get(async (req, res) => {
   }
 });
 
-//* POSTS FROM A SINGLE PERSON
+//* POSTS FROM USER PRIVATE FEED
 router.route('/feed/:username').get(async(req, res) => {
   const username = req.params.username
 
@@ -176,4 +187,28 @@ router.route('/feed/:username').get(async(req, res) => {
   }
 })
 
+//* POSTS FROM A SINGLE PERSON
+router.route('/user/:username').get(async(req , res) => {
+  const username = req.params.username
+
+  try{
+    const getData = await db.query('SELECT * FROM posts WHERE posts.username = $1 ORDER BY createdAt DESC', [username])
+    res.status(200).json(
+      {
+        status: "Success",
+        data: {
+          numOfRows: getData.rows.length,
+          posts: getData.rows
+        }
+      }
+    )
+  } catch(err){
+    res.status(400).json(
+      {
+        status: 'Failed',
+        message: err.message
+      }
+    )
+  }
+})
 module.exports = router;

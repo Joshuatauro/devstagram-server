@@ -75,24 +75,28 @@ router.route('/unfollow/subreddit').post(async(req, res) => {
 })
 
 
-router.route('/:username').get(async(req , res) => {
+
+
+router.route('/details/:username').get(async(req , res) => {
   const username = req.params.username
-  console.log(username)
 
   try{
-    const getData = await db.query('SELECT * FROM posts WHERE posts.username = $1 ORDER BY createdAt DESC', [username])
+    const getData = await db.query('SELECT * FROM users WHERE username = $1', [username])
     res.status(200).json(
       {
         status: "Success",
         data: {
-          numOfRows: getData.rows.length,
-          posts: getData.rows
+          userDetails: getData.rows[0] 
         }
       }
     )
-    console.log(getData.rows)
   } catch(err){
-    console.log(err)
+    res.status(400).json(
+      {
+        status: 'Failed',
+        message: err.message
+      }
+    )
   }
 })
 
