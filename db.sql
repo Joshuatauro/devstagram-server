@@ -30,4 +30,13 @@ CREATE TABLE subreddits (
   about VARCHAR NOT NULL
 );
 
-INSERT INTO posts (username,title,content,subreddit,createdAt) VALUES ('Joshua','Welcome to Devstagram','This si the forst poeeif grtngui eodijf goigtnor edio3fo34n giotgtign gg 3 4 t5  g tg e 3 45ggunronigoignignoigniotn geigono egin gg45 weegeg grgrt','All','2016-06-23')
+SELECT comments.content, comments.username,comments.createdat, comments.comment_id 
+FROM comments 
+JOIN posts ON posts.postid = comments.parent_postid 
+WHERE posts.postid = $1
+ORDER BY createdat DESC
+
+SELECT comments.content, comments.username,comments.createdat, comments.comment_id,comments.parent_postid,posts.postid, users.profile_url
+FROM comments, users, posts
+WHERE comments.parent_postid = posts.postid AND comments.username = users.username
+ORDER BY comments.createdat DESC;

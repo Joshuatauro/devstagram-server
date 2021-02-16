@@ -36,11 +36,16 @@ router.route('/:postID').get(async(req,res) => {
   const postID = req.params.postID
 
   try{
-    const comments = await db.query(`SELECT comments.content, comments.username,comments.createdat, comments.comment_id 
-                                    FROM comments 
-                                    JOIN posts ON posts.postid = comments.parent_postid 
-                                    WHERE posts.postid = $1
-                                    ORDER BY createdat DESC`, [postID])
+    // const comments = await db.query(`SELECT comments.content, comments.username,comments.createdat, comments.comment_id 
+    //                                 FROM comments 
+    //                                 JOIN posts ON posts.postid = comments.parent_postid 
+    //                                 WHERE posts.postid = $1
+    //                                 ORDER BY createdat DESC`, [postID])
+    const comments = await db.query(`SELECT comments.content, comments.username,comments.createdat, comments.comment_id,comments.parent_postid, users.profile_url
+                                    FROM comments, users
+                                    WHERE comments.parent_postid = $1 AND comments.username = users.username
+                                    ORDER BY comments.createdat DESC`, [postID])
+    console.log(comments.rows)
     res.status(200).json(
       {
         status: "Success",
