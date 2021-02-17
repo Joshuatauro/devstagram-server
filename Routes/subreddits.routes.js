@@ -26,7 +26,7 @@ router.route('/:subreddit').get(async(req, res) => {
   const subreddit = req.params.subreddit
 
   try{
-    const aboutSubreddit = await db.query('SELECT about, followed_by FROM subreddits WHERE subreddit = $1', [subreddit])
+    const aboutSubreddit = await db.query('SELECT about, followed_by FROM subreddits WHERE subreddit ILIKE $1', [subreddit])
     res.status(200).json(
       {
         status:'Success',

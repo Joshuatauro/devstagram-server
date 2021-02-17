@@ -4,9 +4,9 @@ const db = require("../db");
 //* FOR GETTING ALL ALL POSTS
 router.route("/").get(async (req, res) => {
   try {
-    const posts = await db.query(`SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit, posts.username, posts.createdat, COUNT(comments.parent_postid) AS comments_count
-                                  FROM posts LEFT JOIN comments ON comments.parent_postid = posts.postid
-                                  GROUP BY posts.postid
+    const posts = await db.query(`SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit, posts.username, posts.createdat, users.profile_url
+                                  FROM posts LEFT JOIN users ON users.username = posts.username
+                                  GROUP BY posts.postid, users.profile_url
                                   ORDER BY posts.createdAt DESC`);
     res.status(200).json({
       status: "Success",
@@ -141,9 +141,9 @@ router.route('/update/:postID').put(async(req, res) => {
 router.route("/:postID").get(async (req, res) => {
   const postID = req.params.postID;
   try {
-    const post = await db.query("SELECT * FROM posts WHERE postid = $1", [
-      postID,
-    ]);
+    const post = await db.query(`SELECT posts.title, posts.content, posts.subreddit,  posts.username, posts.img_url, users.profile_url,posts.createdat
+                                FROM posts JOIN users ON users.username = posts.username
+                                WHERE posts.postid = $1`, [postID])
     res.status(200).json({
       status: "Success",
       data: {
@@ -165,10 +165,10 @@ router.route('/feed/:username').get(async(req, res) => {
   const username = req.params.username
 
   try{
-    const feedPosts = await db.query(`SELECT posts.postid, posts.username, posts.content, posts.title, posts.subreddit, posts.createdat, users.uid FROM posts, users
-                                      WHERE posts.subreddit = ANY(users.followed_subreddits)
-                                      AND users.username = $1
-                                      ORDER BY createdat DESC`, [username])
+      const feedPosts = await db.query(`SELECT posts.postid, posts.username, posts.content, posts.title, posts.subreddit, posts.createdat, users.uid FROM posts, users
+                                        WHERE posts.subreddit = ANY(users.followed_subreddits)
+                                        AND users.username = 'joshua_45'
+                                        ORDER BY createdat DESC`, [username])
                                       
   
     res.status(200).json(
@@ -195,7 +195,10 @@ router.route('/user/:username').get(async(req , res) => {
   const username = req.params.username
 
   try{
-    const getData = await db.query('SELECT * FROM posts WHERE posts.username = $1 ORDER BY createdAt DESC', [username])
+    const getData = await db.query(`SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit, posts.username, posts.createdat, COUNT(comments.parent_postid) AS comments_count
+                                    FROM posts, comments WHERE posts.username = $1
+                                    GROUP BY posts.postid
+                                    ORDER BY posts.createdAt`, [username])
     res.status(200).json(
       {
         status: "Success",

@@ -45,3 +45,26 @@ SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit,
 FROM posts LEFT JOIN comments ON comments.parent_postid = posts.postid
 GROUP BY posts.postid
 ORDER BY posts.createdAt;
+
+SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit, posts.username, posts.createdat, COUNT(comments.parent_postid) AS comments_count
+FROM posts, comments WHERE posts.username = 'joshua_45'
+GROUP BY posts.postid
+ORDER BY posts.createdAt;
+
+SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit, posts.username, posts.createdat, users.profile_url, COUNT(comments.parent_postid) AS comments_count
+FROM posts LEFT JOIN comments ON comments.parent_postid = posts.postid LEFT JOIN users ON users.username = posts.username
+GROUP BY posts.postid, users.profile_url
+ORDER BY posts.createdAt DESC
+
+SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit, posts.username, posts.createdat, users.profile_url, COUNT(comments.parent_postid) AS comments_count
+FROM posts LEFT JOIN comments ON comments.parent_postid = posts.postid LEFT JOIN users ON posts.username = 'joshua_45'
+GROUP BY posts.postid, users.profile_url
+ORDER BY posts.createdAt DESC
+
+SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit, posts.username, posts.createdat, users.profile_url, COUNT(comments.parent_postid) AS comments_count
+FROM posts LEFT JOIN comments ON comments.parent_postid = posts.postid LEFT JOIN users ON users.username= 'joshua_45' 
+GROUP BY posts.postid, users.profile_url
+ORDER BY posts.createdAt
+
+SELECT posts.postid, users.profile_url, users.username, comments.content
+FROM posts LEFT JOIN users ON users.username = posts.username LEFT JOIN comments ON comments.parent_postid = posts.postid;
