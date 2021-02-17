@@ -40,3 +40,8 @@ SELECT comments.content, comments.username,comments.createdat, comments.comment_
 FROM comments, users, posts
 WHERE comments.parent_postid = posts.postid AND comments.username = users.username
 ORDER BY comments.createdat DESC;
+
+SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit, posts.username, posts.createdat, COUNT(comments.parent_postid) AS comments_count
+FROM posts LEFT JOIN comments ON comments.parent_postid = posts.postid
+GROUP BY posts.postid
+ORDER BY posts.createdAt;

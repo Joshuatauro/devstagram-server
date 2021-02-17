@@ -57,7 +57,7 @@ router.route('/dislike').post(async(req, res) => {
   const postID = req.body.postID
   const userName = req.body.userName
   try{
-    const deleteLike = await db.query('DELETE FROM likes WHERE username = $1', [userName])
+    const deleteLike = await db.query('DELETE FROM likes WHERE username = $1 AND parent_postid = $2', [userName,postID])
     
     res.status(200).json(
       {

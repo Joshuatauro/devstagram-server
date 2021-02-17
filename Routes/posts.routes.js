@@ -4,7 +4,10 @@ const db = require("../db");
 //* FOR GETTING ALL ALL POSTS
 router.route("/").get(async (req, res) => {
   try {
-    const posts = await db.query("SELECT * FROM posts ORDER BY createdat DESC");
+    const posts = await db.query(`SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit, posts.username, posts.createdat, COUNT(comments.parent_postid) AS comments_count
+                                  FROM posts LEFT JOIN comments ON comments.parent_postid = posts.postid
+                                  GROUP BY posts.postid
+                                  ORDER BY posts.createdAt DESC`);
     res.status(200).json({
       status: "Success",
       numOfResults: posts.rows.length,

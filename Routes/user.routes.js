@@ -1,12 +1,14 @@
 const router = require("express").Router()
 const db = require('../db')
 
+//*GET SETTINGS FOR THE CURRENT USER
 router.route('/settings').get(async(req,res) => {
   const uid = req.body.uid
 
   const response = await db.query('SELECT * FROM users WHERE uid = $1', [uid])
 })
 
+//* CREATE AN ACCOUNT
 router.route('/create').post(async(req,res) => {
   const uid = req.body.uid
   const username = req.body.userName
@@ -14,6 +16,7 @@ router.route('/create').post(async(req,res) => {
 
   try{
     const addUser = await db.query('INSERT INTO users(uid, username) VALUES ($1,$2)', [uid, username])
+    console.log(addUser)
     res.status(200).json(
       {
         status: 'Success'
