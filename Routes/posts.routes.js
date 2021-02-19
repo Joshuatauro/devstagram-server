@@ -31,7 +31,10 @@ router.route("/subreddit/:subreddits").get(async (req, res) => {
 
   try {
     const posts = await db.query(
-      "SELECT * FROM posts WHERE subreddit ILIKE $1 ORDER BY createdat DESC",
+      `
+      SELECT posts.title, posts.content, posts.username, posts.createdat, posts.subreddit, users.profile_url, posts.img_url
+      FROM posts JOIN users ON users.username = posts.username
+      WHERE posts.subreddit ILIKE $1`,
       [subreddits]
     );
     res.status(200).json({
@@ -164,12 +167,15 @@ router.route("/:postID").get(async (req, res) => {
 router.route('/feed/:username').get(async(req, res) => {
   const username = req.params.username
 
+  console.log('recieved')
+
   try{
-      const feedPosts = await db.query(`SELECT posts.postid, posts.username, posts.content, posts.title, posts.subreddit, posts.createdat, users.uid FROM posts, users
-                                        WHERE posts.subreddit = ANY(users.followed_subreddits)
-                                        AND users.username = 'joshua_45'
-                                        ORDER BY createdat DESC`, [username])
-                                      
+      const feedPosts = await db.query(`SELECT title,postid, content,createdat,FOLLOWED_SUBREDDITS.username,FOLLOWED_SUBREDDITS.img_url, FOLLOWED_SUBREDDITS.subreddit,FOLLOWED_SUBREDDITS.profile_url,img_url FROM (
+                                        SELECT posts.title,posts.postid, posts.content, posts.createdat, posts.username, users.profile_url, posts.img_url, posts.subreddit
+                                        FROM posts LEFT JOIN users ON users.username = posts.username
+                                        ) AS FOLLOWED_SUBREDDITS, users
+                                        WHERE subreddit = ANY(users.followed_subreddits) AND users.username = $1
+                                        ORDER BY FOLLOWED_SUBREDDITS.createdat DESC`, [username])
   
     res.status(200).json(
       {
@@ -181,7 +187,7 @@ router.route('/feed/:username').get(async(req, res) => {
     )
   
   } catch (err) {
-    res.status(400).json(
+    res.status(404).json(
       {
         status: 'Something went wrong',
         message: err.message
@@ -195,10 +201,10 @@ router.route('/user/:username').get(async(req , res) => {
   const username = req.params.username
 
   try{
-    const getData = await db.query(`SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit, posts.username, posts.createdat, COUNT(comments.parent_postid) AS comments_count
-                                    FROM posts, comments WHERE posts.username = $1
-                                    GROUP BY posts.postid
-                                    ORDER BY posts.createdAt`, [username])
+    const getData = await db.query(`SELECT posts.postid, posts.title, posts.content, posts.img_url, posts.subreddit, posts.username, posts.createdat, users.profile_url
+                                    FROM posts JOIN users ON users.username = posts.username
+                                    WHERE users.username = $1
+                                    ORDER BY posts.createdat DESC`, [username])
     res.status(200).json(
       {
         status: "Success",

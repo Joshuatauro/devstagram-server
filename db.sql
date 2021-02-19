@@ -68,3 +68,18 @@ ORDER BY posts.createdAt
 
 SELECT posts.postid, users.profile_url, users.username, comments.content
 FROM posts LEFT JOIN users ON users.username = posts.username LEFT JOIN comments ON comments.parent_postid = posts.postid;
+
+
+SELECT posts.title, posts.content, posts.username, posts.subreddit, posts.createdat, users.profile_url, posts.img_url
+FROM posts LEFT JOIN users ON posts.subreddit = ANY(users.followed_subreddits)
+WHERE user.username = 'test_account'
+
+SELECT title, content,createdat,FOLLOWED_SUBREDDITS.username,FOLLOWED_SUBREDDITS.profile_url,img_url FROM (
+  SELECT posts.title, posts.content, posts.createdat, posts.username, users.profile_url, posts.img_url, posts.subreddit
+  FROM posts LEFT JOIN users ON users.username = posts.username
+) AS FOLLOWED_SUBREDDITS, users
+WHERE subreddit = ANY(users.followed_subreddits) AND users.username = 'joshua_45';
+
+SELECT posts.title, posts.content, posts.username, posts.createdat, posts.subreddit, users.profile_url, posts.img_url
+FROM posts JOIN users ON users.username = posts.username
+WHERE posts.subreddit ILIKE 'ALL';

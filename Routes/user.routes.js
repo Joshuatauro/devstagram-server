@@ -2,10 +2,94 @@ const router = require("express").Router()
 const db = require('../db')
 
 //*GET SETTINGS FOR THE CURRENT USER
-router.route('/settings').get(async(req,res) => {
-  const uid = req.body.uid
+router.route('/settings/:uid').get(async(req,res) => {
+  const uid = req.params.uid
+  const response = await db.query('SELECT username,bio,profile_url,portfolio FROM users WHERE uid = $1', [uid])
+  
+  try{
+    
+    res.status(200).json(
+      {
+        status: 'Success',
+        data: {
+          userData: response.rows[0]
+        }
+      }
+    )
+  } catch (err) {
+    res.status(400).json(
+      {
+        status: 'Failed',
+        message: err.message
+      }
+    )
+  }
+})
 
-  const response = await db.query('SELECT * FROM users WHERE uid = $1', [uid])
+router.route('/update/profile').post(async(req, res) => {
+  const uid = req.body.uid
+  const downloadURL = req.body.imageDownloadURL
+  console.log('here')
+  try{
+    const response = await db.query('UPDATE users SET profile_url = $1 WHERE uid = $2', [downloadURL, uid])
+    res.status(200).json(
+      {
+        status: 'Success',
+      }
+    )
+
+  } catch(err) {
+    res.status(400).json(
+      {
+        status: 'Failed',
+        message: err.message
+      }
+    )
+  }
+})
+
+router.route('/update/bio').post(async(req, res) => {
+  const uid = req.body.uid
+  const bio = req.body.bio
+
+  try{
+    const response = await db.query('UPDATE users SET bio = $1 WHERE uid = $2', [bio, uid])
+    res.status(200).json(
+      {
+        status: 'Success',
+      }
+    )
+
+  } catch(err) {
+    res.status(400).json(
+      {
+        status: 'Failed',
+        message: err.message
+      }
+    )
+  }
+})
+
+router.route('/update/portfolio').post(async(req, res) => {
+  const uid = req.body.uid
+  const portfolio = req.body.portfolio
+
+  try{
+    const response = await db.query('UPDATE users SET portfolio = $1 WHERE uid = $2', [portfolio, uid])
+    res.status(200).json(
+      {
+        status: 'Success',
+      }
+    )
+
+  } catch(err) {
+    res.status(400).json(
+      {
+        status: 'Failed',
+        message: err.message
+      }
+    )
+  }
 })
 
 //* CREATE AN ACCOUNT
